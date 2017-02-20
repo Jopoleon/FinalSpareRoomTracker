@@ -38,12 +38,12 @@ type UserInfo struct {
 
 var store = sessions.NewCookieStore([]byte("nRrHLlHcHH0u7fUz25Hje9m7uJ5SnJzP"))
 
-var mongoUrl = "localhost"
+//"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
+var mongoUrl = "mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 
 var startUrl = "http://www.spareroom.co.uk/flatshare/search.pl?flatshare_type=offered&location_type=area&search="
 var endUrl = "&miles_from_max=1&action=search&templateoveride=&show_results=&submit="
 
-//"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 var DBname = "spareroom"
 
 func main() {
