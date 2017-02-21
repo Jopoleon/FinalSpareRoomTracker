@@ -1,3 +1,4 @@
+// Package models contains structs for using in database.
 package models
 
 type UserInfo struct {

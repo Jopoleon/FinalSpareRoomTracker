@@ -1,3 +1,5 @@
+// Package scrape implements scrape function using goquery libriary.
+
 package scrape
 
 import (
