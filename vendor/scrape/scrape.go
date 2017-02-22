@@ -11,8 +11,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
-
-	"gopkg.in/mgo.v2"
+	//"gopkg.in/mgo.v2"
 )
 
 type RoomInfo struct {
@@ -20,9 +19,6 @@ type RoomInfo struct {
 	Cost     string `json:Cost bson:Cost`
 	ImageUrl string `json:ImageUrl bson:ImageUrl`
 }
-
-var DBname = "spareroom"
-var mongoUrl = "mongodb://egor_m:qwer1234@ds135029.mlab.com:35029/spareroom"
 
 var startUrl = "http://www.spareroom.co.uk/flatshare/search.pl?flatshare_type=offered&location_type=area&search="
 var endUrl = "&miles_from_max=1&action=search&templateoveride=&show_results=&submit="
@@ -45,22 +41,11 @@ func ScrapeRoomsWithLocation(location string) ([]byte, error) {
 
 	mapRoomInfo := make([]RoomInfo, 11)
 
-	session, err := mgo.Dial(mongoUrl)
-	if err != nil {
-		log.Println(err)
-	}
-	defer session.Close()
-
 	doc.Find("#maincontent ul.listing-results article.panel-listing-result").Each(func(i int, s *goquery.Selection) {
 		mapRoomInfo[i] = RoomInfo{
 			Title:    s.Find("header.desktop a h1").Text(),
 			Cost:     s.Find("strong.listingPrice").First().Text(),
 			ImageUrl: s.Find("figure img").AttrOr("src", "No photo"),
-		}
-		RoomInfoColletion := session.DB(DBname).C("requestHistory")
-		err = RoomInfoColletion.Insert(mapRoomInfo[i])
-		if err != nil {
-			log.Println(err)
 		}
 
 	})
@@ -91,22 +76,11 @@ func TrialScrapeRooms(location string) ([]byte, error) {
 
 	mapRoomInfo := make([]RoomInfo, 11)
 
-	session, err := mgo.Dial(mongoUrl)
-	if err != nil {
-		log.Println(err)
-	}
-	defer session.Close()
-
 	doc.Find("#maincontent ul.listing-results article.panel-listing-result").Each(func(i int, s *goquery.Selection) {
 		mapRoomInfo[i] = RoomInfo{
 			Title:    s.Find("header.desktop a h1").Text(),
 			Cost:     s.Find("strong.listingPrice").First().Text(),
 			ImageUrl: s.Find("figure img").AttrOr("src", "No photo"),
-		}
-		RoomInfoColletion := session.DB(DBname).C("requestHistory")
-		err = RoomInfoColletion.Insert(mapRoomInfo[i])
-		if err != nil {
-			log.Println(err)
 		}
 
 	})

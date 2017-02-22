@@ -117,8 +117,8 @@ func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr string) {
 
 	//linkTag := "<a href='" + link + "'>" + link + "</a>"
 	msg := []byte("To: " + emailadr + "\r\n" +
-		"Subject: New rooms in your tracking area: \n" + roominfoslice[0].Location + "\r\n" +
-		"\r\n" + " Hello " + roominfoslice[0].Username + "\n Here are some new rooms for you: " +
+		"Subject: New rooms in your tracking area: " + roominfoslice[0].Location + "\r\n" +
+		"\r\n" + " Hello " + roominfoslice[0].Username + "\n Here are some new rooms for you: \n \n" +
 		msgbody)
 	//<a href="http://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902">https://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902
 	err = smtp.SendMail(emailUser.EmailServer+":"+strconv.Itoa(emailUser.Port),

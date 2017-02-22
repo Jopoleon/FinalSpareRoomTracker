@@ -39,12 +39,20 @@ type UserInfo struct {
 var store = sessions.NewCookieStore([]byte("nRrHLlHcHH0u7fUz25Hje9m7uJ5SnJzP"))
 
 //"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
-var mongoUrl = "mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
+var mongoUrl = "localhost"
+
+//"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 
 var startUrl = "http://www.spareroom.co.uk/flatshare/search.pl?flatshare_type=offered&location_type=area&search="
 var endUrl = "&miles_from_max=1&action=search&templateoveride=&show_results=&submit="
 
 var DBname = "spareroom"
+
+//sendMailLimitThreshold is how many new rooms tracker saves before sending email with list of this rooms
+var sendMailLimitThreshold = 20
+
+//trackerCycleTimeStep is how many SECONDS tracker sleeps befor make another cycle of cheking new rooms
+var trackerCycleTimeStep = (10 * time.Second)
 
 func main() {
 	ctl, err := NewController()
@@ -97,6 +105,23 @@ type Controller struct {
 	// This will be our extensible type that will
 	// be used as a common context type for our routes
 	session *mgo.Session // our cloneable session
+}
+
+func NewController() (*Controller, error) {
+	// This function will return to us a
+	// Controller that has our common DB context.
+	// We can then use it for multiple routes
+	uri := mongoUrl
+	if uri == "" {
+		return nil, fmt.Errorf("no DB connection string provided")
+	}
+	session, err := mgo.Dial(uri)
+	if err != nil {
+		return nil, err
+	}
+	return &Controller{
+		session: session,
+	}, nil
 }
 
 func (ctl *Controller) initCollectionPullScrape(username, location string) error {
@@ -186,7 +211,7 @@ func (ctl *Controller) trackingScraper(username, location string) error {
 				//return err
 			}
 			log.Println("Limit in ", trackcollectionname, " :", limit)
-			if (limit + 5) < 16 {
+			if (limit + 5) < sendMailLimitThreshold {
 				//log.Println("Inserting ", trackingRoomInfo, " in ", trackcollectionname)
 				err = ctrack.Insert(trackingRoomInfo)
 				if err != nil {
@@ -368,9 +393,9 @@ func (ctl *Controller) startTrackingAllUsers() {
 		pairs := ctl.makeSliceOfTrackPairs()
 		//log.Println("Pairs: ", pairs)
 		for _, pair := range pairs {
-			ctl.trackingScraper(pair.Username, pair.Location)
+			go ctl.trackingScraper(pair.Username, pair.Location)
 		}
-		time.Sleep(10 * time.Second)
+		time.Sleep(trackerCycleTimeStep)
 	}
 }
 
@@ -396,30 +421,16 @@ func (ctl *Controller) makeSliceOfTrackPairs() []models.TrackInfo {
 	return TrackInfoPairs
 }
 
-func NewController() (*Controller, error) {
-	// This function will return to us a
-	// Controller that has our common DB context.
-	// We can then use it for multiple routes
-	uri := mongoUrl
-	if uri == "" {
-		return nil, fmt.Errorf("no DB connection string provided")
-	}
-	session, err := mgo.Dial(uri)
-	if err != nil {
-		return nil, err
-	}
-	return &Controller{
-		session: session,
-	}, nil
-}
-
 func (ctl *Controller) SignUpSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "sessionRooms")
 	if err != nil {
 		log.Println(err)
 		//http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	r.ParseForm()
+	err = r.ParseForm()
+	if err != nil {
+		log.Println("r.ParseForm() ", err)
+	}
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	email := r.FormValue("email")
@@ -470,7 +481,6 @@ func (ctl *Controller) SignUpSubmitHandler(w http.ResponseWriter, r *http.Reques
 	} else {
 		w.Write([]byte("Some of registration fields are empty!"))
 	}
-	// log.Println(session.Values["password"], session.Values["username"])
 }
 
 func (ctl *Controller) LoginSubmitHandler(w http.ResponseWriter, r *http.Request) {
