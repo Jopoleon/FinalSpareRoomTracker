@@ -16,9 +16,11 @@ import (
 	"log"
 	//"net/http"
 	//"github.com/gorilla/sessions"
+	//"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 	"net/http/httptest"
 	"net/url"
-	"strings"
+	//"strings"
 )
 
 // //Homepage
@@ -41,16 +43,64 @@ import (
 
 // 	http.HandleFunc("/watchlocation", ctl.AddTrackingPair)
 // 	http.HandleFunc("/deletewatchlocation", ctl.DeleteTrackerPair)
-var ctl *Controller
 
 func TestSignUpSubmitHandler(t *testing.T) {
+
+	ctl, err := NewController()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	data := url.Values{}
 	data.Set("username", "testusername")
 	data.Add("password", "testpass")
-	data.Add("email", "egortictac2@mail.ru")
+	data.Add("email", "egortictac@mail.ru")
 	data.Add("urlforactivation", "testurl")
 
+	b := bytes.NewBufferString(data.Encode())
+
+	req, err := http.NewRequest("POST", "/signupsubmit", b)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(ctl.SignUpSubmitHandler)
+
+	handler.ServeHTTP(rr, req)
+	session, err := store.Get(req, "sessionRooms")
+	if err != nil {
+		log.Println(err)
+
+	}
+
+	log.Println(session.Values)
+
+	dbsession := ctl.session.Clone()
+	defer dbsession.Close()
+	c := dbsession.DB(DBname).C("usersInfo")
+	result := UserInfo{}
+	err = c.Find(bson.M{"username": "testusername"}).One(&result)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedusername := "testusername"
+
+	if result.Username != expectedusername {
+		t.Errorf("SingUpSubmit registred user: got %v want %v",
+			result.Username, expectedusername)
+	}
+}
+func TestLoginSubmitHandler(t *testing.T) {
+	testctl, err := NewController()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data := url.Values{}
+	data.Set("username", "testusername")
+	data.Add("password", "testpass")
 	b := bytes.NewBufferString(data.Encode())
 
 	req, err := http.NewRequest("POST", "/signupsubmit", b)
@@ -61,31 +111,36 @@ func TestSignUpSubmitHandler(t *testing.T) {
 	//log.Println("inside test SignUpSubmitHandler")
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(ctl.SignUpSubmitHandler)
+	handler := http.HandlerFunc(testctl.LoginSubmitHandler)
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 
 	// directly and pass in our Request and ResponseRecorder.
 	handler.ServeHTTP(rr, req)
+
 	session, err := store.Get(req, "sessionRooms")
 	if err != nil {
 		log.Println(err)
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	log.Println(session.Values)
+	session.Values["email"] = "egortictac@mail.ru"
+	session.Save(req, rr)
 
-	// Check the status code is what we expect.
-	// if status := rr.Code; status != http.StatusOK {
-	// 	t.Errorf("handler returned wrong status code: got %v want %v",
-	// 		status, http.StatusOK)
-	// }
+	dbsession := ctl.session.Clone()
+	defer dbsession.Close()
+	c := dbsession.DB(DBname).C("usersInfo")
+	result := UserInfo{}
+	err = c.Find(bson.M{"username": "testusername"}).One(&result)
 
-	// Check the response body is what we expect.
-	expected := `{"shipHight":  150}`
+	expectedstatus := "false"
 	log.Println(rr.Body.String())
-
-	if strings.Contains(rr.Body.String(), expected) {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			rr.Body.String(), expected)
+	if result.Loggedin != expectedstatus {
+		t.Errorf("LoginSubmitHandler registred user: got %v want %v",
+			result.Loggedin, expectedstatus)
 	}
+
+}
+
+func TestConfirmSignUpHandler(t *testing.T) {
+
 }

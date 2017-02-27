@@ -54,7 +54,7 @@ func (e *emailSender) Send(to []string, body []byte) error {
 	auth := smtp.PlainAuth("", e.conf.Username, e.conf.Password, e.conf.ServerHost)
 	return e.send(addr, auth, e.conf.SenderAddr, to, body)
 }
-func TestEmail_SendSuccessful(t *testing.T) {
+func TestSendEmailwithKey(t *testing.T) {
 	f, r := mockSend(nil)
 	sender := &emailSender{send: f}
 	body := "Hello World"

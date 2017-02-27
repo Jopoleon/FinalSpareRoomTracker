@@ -92,7 +92,7 @@ func SendEmailwithKey(key, addres, currentActivationUrl string) {
 // 	ImageUrl string `json:ImageUrl bson:ImageUrl`
 // }
 
-func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr string) {
+func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr, user, loca string) {
 
 	type EmailUser struct {
 		Username    string
@@ -115,12 +115,10 @@ func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr string) {
 		msgbody += " " + info.Title + " " + info.Cost + " " + "https:" + info.ImageUrl + "\n\n"
 	}
 
-	//linkTag := "<a href='" + link + "'>" + link + "</a>"
 	msg := []byte("To: " + emailadr + "\r\n" +
-		"Subject: New rooms in your tracking area: " + roominfoslice[0].Location + "\r\n" +
-		"\r\n" + " Hello " + roominfoslice[0].Username + "\n Here are some new rooms for you: \n \n" +
+		"Subject: New rooms in your tracking area: " + loca + "\r\n" +
+		"\r\n" + " Hello " + user + "\n Here are some new rooms for you: \n \n" +
 		msgbody)
-	//<a href="http://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902">https://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902
 	err = smtp.SendMail(emailUser.EmailServer+":"+strconv.Itoa(emailUser.Port),
 		auth,
 		emailUser.Username,
