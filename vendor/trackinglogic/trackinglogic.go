@@ -3,16 +3,12 @@ package trackinglogic
 import (
 	"errors"
 	"fmt"
-	//"html/template"
 	"log"
 	"net/http"
-	//"os"
 	"strings"
 	"time"
 
 	"models"
-	//"scrape"
-	//"userlogic"
 	"utils"
 
 	"github.com/PuerkitoBio/goquery"
@@ -39,15 +35,12 @@ var sendMailLimitThreshold = 20
 var trackerCycleTimeStep = (10 * time.Second)
 
 type Controller struct {
-	// This will be our extensible type that will
-	// be used as a common context type for our routes
-	session *mgo.Session // our cloneable session
+	
+	session *mgo.Session 
 }
 
 func NewController() (*Controller, error) {
-	// This function will return to us a
-	// Controller that has our common DB context.
-	// We can then use it for multiple routes
+	
 	uri := mongoUrl
 	if uri == "" {
 		return nil, fmt.Errorf("no DB connection string provided")
@@ -62,11 +55,11 @@ func NewController() (*Controller, error) {
 }
 
 func (ctl *Controller) StartTrackingAllUsers() {
-	//log.Println("inside startTrackingAllUsers")
+	
 	for {
 		log.Println("inside startTrackingAllUsers")
 		pairs := ctl.MakeSliceOfTrackPairs()
-		//log.Println("Pairs: ", pairs)
+		
 		for _, pair := range pairs {
 			go ctl.TrackingScraper(pair.Username, pair.Location)
 		}
@@ -79,12 +72,12 @@ func (ctl *Controller) MakeSliceOfTrackPairs() []models.TrackInfo {
 	defer dbsession.Close()
 
 	TrackInfoColletion := dbsession.DB(DBname).C("usersTrackInfo")
-	//result := TrackInfo{}
+	
 	num, err := TrackInfoColletion.Count()
 	if err != nil {
 		log.Println(err)
 	}
-	//log.Println("Amount of documents: ", num)
+	
 
 	TrackInfoPairs := make([]models.TrackInfo, num)
 
@@ -92,7 +85,7 @@ func (ctl *Controller) MakeSliceOfTrackPairs() []models.TrackInfo {
 	if err != nil {
 		log.Println(err)
 	}
-	//log.Println("Inside makeSliceOfTrackPairs: ", TrackInfoPairs)
+	
 	return TrackInfoPairs
 }
 
@@ -106,7 +99,7 @@ func (ctl *Controller) InitCollectionPullScrape(username, location string) error
 	}
 	var ErrorString = "Cant find such location, try another, or type it correct!"
 	if doc.Find("#maincontent ul.listing-results article.panel-listing-result").Text() == "" {
-		//return []byte(ErrorString), errors.New(ErrorString)
+		
 		return errors.New(ErrorString)
 	}
 
