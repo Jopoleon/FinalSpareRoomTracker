@@ -36,8 +36,6 @@ var store = sessions.NewCookieStore([]byte("nRrHLlHcHH0u7fUz25Hje9m7uJ5SnJzP"))
 //"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 var mongoUrl = "localhost"
 
-//"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
-
 var startUrl = "http://www.spareroom.co.uk/flatshare/search.pl?flatshare_type=offered&location_type=area&search="
 var endUrl = "&miles_from_max=1&action=search&templateoveride=&show_results=&submit="
 
@@ -50,10 +48,7 @@ var sendMailLimitThreshold = 20
 var trackerCycleTimeStep = (10 * time.Second)
 
 func main() {
-	// ctl, err := NewController()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -107,15 +102,12 @@ func main() {
 
 //https://www.andjosh.com/2015/01/31/middleware-in-go/
 type Controller struct {
-	// This will be our extensible type that will
-	// be used as a common context type for our routes
-	session *mgo.Session // our cloneable session
+	
+	session *mgo.Session
 }
 
 func NewController() (*Controller, error) {
-	// This function will return to us a
-	// Controller that has our common DB context.
-	// We can then use it for multiple routes
+	
 	uri := mongoUrl
 	if uri == "" {
 		return nil, fmt.Errorf("no DB connection string provided")
