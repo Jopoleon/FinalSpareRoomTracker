@@ -6,11 +6,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"net/smtp"
-	//"github.com/PuerkitoBio/goquery"
-	//"io/ioutil"
-	//"io"
-	//"encoding/json"
-	//"errors"
 	"log"
 	"models"
 	"regexp"
@@ -33,14 +28,12 @@ func GenerateKey32chars() string {
 	buf := make([]byte, 16)
 	_, err := rand.Read(buf)
 	if err != nil {
-		panic(err) // out of randomness, should never happen
+		panic(err) 
 	}
 	return fmt.Sprintf("%x", buf)
-	// or hex.EncodeToString(buf)
-	// or base64.StdEncoding.EncodeToString(buf)
+	
 }
 
-//https://www.socketloop.com/tutorials/golang-validate-email-address-with-regular-expression
 func ValidateEmail(email string) bool {
 	Re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	return Re.MatchString(email)
@@ -48,7 +41,7 @@ func ValidateEmail(email string) bool {
 
 func SendEmailwithKey(key, addres, currentActivationUrl string) {
 	fmt.Println("Start time: ", time.Now())
-	//Sendkey2017
+	
 	type EmailUser struct {
 		Username    string
 		Password    string
@@ -67,12 +60,11 @@ func SendEmailwithKey(key, addres, currentActivationUrl string) {
 	var err error
 
 	link := currentActivationUrl + "?" + key
-	//linkTag := "<a href='" + link + "'>" + link + "</a>"
+	
 	msg := []byte("To: " + addres + "\r\n" +
 		"Subject: Activation letter from SpareRoomScraper\r\n" +
 		"\r\n" +
 		"This is your activation link: \r\n" + link)
-	//<a href="http://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902">https://localhost:3000/confirm?1d27bcb9ab2297bc8c569ffd8adc2902
 	err = smtp.SendMail(emailUser.EmailServer+":"+strconv.Itoa(emailUser.Port),
 		auth,
 		emailUser.Username,
@@ -84,13 +76,6 @@ func SendEmailwithKey(key, addres, currentActivationUrl string) {
 	fmt.Println("End time: ", time.Now())
 }
 
-// type RoomInfo struct {
-// 	Username string `json:Username bson:Username`
-// 	Location string `json:Location bson:Location`
-// 	Title    string `json:Title bson:Title`
-// 	Cost     string `json:Cost bson:Cost`
-// 	ImageUrl string `json:ImageUrl bson:ImageUrl`
-// }
 
 func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr, user, loca string) {
 
@@ -127,96 +112,5 @@ func SendEmailTrackList(roominfoslice []models.RoomInfo, emailadr, user, loca st
 	if err != nil {
 		log.Print("ERROR: attempting to send a mail ", err)
 	}
-	//fmt.Println("End time: ", time.Now())
+	
 }
-
-// Old versions of scraper are presented below
-//
-// func ScrapeRoomsWithLocation(location string) ([]byte, error) {
-// 	log.Println("Location for scrape: ", location)
-
-// 	url := startUrl + location + endUrl
-// 	doc, err := goquery.NewDocument(url)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	if doc.Find("#maincontent ul.listing-results article.panel-listing-result").Text() == "" {
-// 		return make([]byte, 0), errors.New("Cant find such location, try another, or type it correct!")
-// 		// callback = append(callback, "Cant find such location, try another, or type it correct!")
-// 		// return callback
-// 	}
-// 	//var searchResults []RoomInfo
-// 	var byteResults []byte
-// 	//roomsMap = make(map[string]string)
-// 	//#maincontent > ul > li:nth-child(1) > article > figure > a > img
-
-// 	doc.Find("#maincontent ul.listing-results article.panel-listing-result").Each(func(i int, s *goquery.Selection) {
-// 		roomsMap := map[string]string{
-// 			"Title":    s.Find("header.desktop a h1").Text(),
-// 			"Cost":     s.Find("strong.listingPrice").First().Text(),
-// 			"ImageUrl": s.Find("figure img").AttrOr("src", "No photo"),
-// 		}
-// 		log.Println("Data BEFORE marshaling json: ", roomsMap)
-// 		//fmt.Printf("%s", roomsMap)
-// 		//fmt.Println(len(`{"Cost":"£800 pcm","ImageUrl":"//photos2.spareroom.co.uk/images/flatshare/listings/cw100h100/27/25/27250129.jpg","Title":"*Double room in central location, Edgware Road"}`))
-
-// 		// ri := RoomInfo{}
-
-// 		// ri.Title = s.Find("header.desktop a h1").Text()
-// 		// ri.Cost = s.Find("strong.listingPrice").First().Text()
-// 		// ri.ImageUrl = s.Find("figure img").AttrOr("src", "No photo")
-
-// 		// a := []byte("Hello")
-// 		// b := []byte(" World!")
-// 		// c := [][]byte{a, b}
-
-// 		// d := []byte{}
-
-// 		// d = bytes.Join(c, []byte(", "))
-// 		// fmt.Println(string(d))
-
-// 		// e := []byte{}
-
-// 		// e = bytes.Join(c, []byte("--"))
-// 		// fmt.Println(string(e))
-
-// 		b, err := json.Marshal(roomsMap)
-// 		if err != nil {
-// 			log.Panicln(err)
-// 		}
-// 		byteResults = append(byteResults, append(b, []byte(", ")...)...)
-// 		// if err != nil {
-// 		// 	return make([]RoomInfo, 0), err.Error())
-// 		// }
-// 		// title := s.Find("header.desktop a h1").Text()
-// 		// weekCost := s.Find("strong.listingPrice").First().Text()
-// 		// ImageUrl := s.Find("figure img").AttrOr("src", "No photo")
-// 		//searchResults = append(searchResults, ri)
-
-// 		//fmt.Println(title + " " + weekCost + " " + ImageUrl)
-// 	})
-// 	//log.Println("ASSSDAASDASD ", roomsMap)
-// 	//fmt.Printf("%s", m)
-// 	//var ri []RoomInfo
-// 	//fmt.Println(json.Unmarshal(byteResults, &ri))
-// 	return byteResults, nil
-// }
-
-// func ScrapeRooms(url string) []string {
-
-// 	doc, err := goquery.NewDocument(url)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	var searchResults []string
-// 	doc.Find("#maincontent ul.listing-results article.panel-listing-result").Each(func(i int, s *goquery.Selection) {
-// 		title := s.Find("header.desktop a h1").Text()
-// 		weekCost := s.Find("strong.listingPrice").First().Text()
-// 		searchResults = append(searchResults, title, weekCost, "\n")
-// 		fmt.Println(title + " " + weekCost)
-// 	})
-// 	fmt.Println(searchResults)
-// 	return searchResults
-// }
