@@ -5,21 +5,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	//"os"
 	"reflect"
-	//"strconv"
-	//"errors"
-	//"time"
-	//"crypto/sha1"
-	//"io/ioutil"
-	//"encoding/json"
-
 	"models"
-	//"scrape"
 	"utils"
 
-	//"github.com/PuerkitoBio/goquery"
-	//"github.com/gorilla/context"
+	
 	"github.com/gorilla/sessions"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -30,7 +20,6 @@ var store = sessions.NewCookieStore([]byte("nRrHLlHcHH0u7fUz25Hje9m7uJ5SnJzP"))
 //"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 var mongoUrl = "localhost"
 
-//"mongodb://egor2:qwer1234@ds153729.mlab.com:53729/spareroom"
 
 var startUrl = "http://www.spareroom.co.uk/flatshare/search.pl?flatshare_type=offered&location_type=area&search="
 var endUrl = "&miles_from_max=1&action=search&templateoveride=&show_results=&submit="
@@ -60,7 +49,7 @@ func (ctl *Controller) SignUpSubmitHandler(w http.ResponseWriter, r *http.Reques
 	session, err := store.Get(r, "sessionRooms")
 	if err != nil {
 		log.Println(err)
-		//http.Error(w, err.Error(), http.StatusInternalServerError)
+		
 	}
 	err = r.ParseForm()
 	if err != nil {
@@ -166,7 +155,7 @@ func (ctl *Controller) LoginSubmitHandler(w http.ResponseWriter, r *http.Request
 				return
 			}
 		} else {
-			//w.Write([]byte("Account not activated"))
+			
 			w.Write([]byte("Your account with username: " + username + " is not activated. Check your email: " + session.Values["email"].(string)))
 			return
 
@@ -200,16 +189,16 @@ func (ctl *Controller) LogoutSubmitHandler(w http.ResponseWriter, r *http.Reques
 				panic(err)
 			}
 			w.Write([]byte("Succsesfuly logedout from " + username))
-			//http.Redirect(w, r, "/", 302)
+			
 		} else {
 			w.Write([]byte("You already have logged out"))
-			//http.Redirect(w, r, "/", 302)
+			
 			return
 		}
 
 	} else {
 		w.Write([]byte("You dont have cookie session, please login first"))
-		//http.Redirect(w, r, "/", 302)
+		
 	}
 
 }
@@ -271,7 +260,7 @@ func (ctl *Controller) IndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctl *Controller) IsUserRegistered(username string) bool {
-	//log.Print("IsRegistred username type: ", reflect.TypeOf(username))
+	
 	dbsession := ctl.session.Clone()
 	defer dbsession.Close()
 
@@ -309,7 +298,7 @@ func (ctl *Controller) IsUserLogged(username string) bool {
 	}
 }
 func (ctl *Controller) IsUserActivated(username string) bool {
-	//log.Print("IsActive username type: ", reflect.TypeOf(username))
+	
 	dbsession := ctl.session.Clone()
 	defer dbsession.Close()
 
