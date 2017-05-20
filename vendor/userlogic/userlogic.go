@@ -290,6 +290,7 @@ func (ctl *Controller) IsUserRegistered(username string) bool {
 		return false
 	}
 }
+
 func (ctl *Controller) IsUserLogged(username string) bool {
 	//log.Print("IsLogged username type: ", reflect.TypeOf(username))
 	dbsession := ctl.session.Clone()

@@ -94,7 +94,7 @@ func main() {
 	http.HandleFunc("/watchlocation", trackerCtl.AddTrackingPair)
 	http.HandleFunc("/deletewatchlocation", trackerCtl.DeleteTrackerPair)
 
-	// startTrackingAllUsers invikes goroutine wich activates all users requests for tracking
+	// startTrackingAllUsers invikes goroutine which activates all users requests for tracking
 	go trackerCtl.StartTrackingAllUsers()
 
 	//invoke static files(javascript, css, etc.)
@@ -128,6 +128,25 @@ func NewController() (*Controller, error) {
 	return &Controller{
 		session: session,
 	}, nil
+}
+
+func SignUpHandler(w http.ResponseWriter, r *http.Request) {
+
+	t, err := template.ParseFiles("static/signup.html")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+	t.ExecuteTemplate(w, "signup.html", nil)
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	t, err := template.ParseFiles("static/login.html")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	}
+	t.ExecuteTemplate(w, "login.html", nil)
+
 }
 
 // func (ctl *Controller) initCollectionPullScrape(username, location string) error {
@@ -727,22 +746,3 @@ func NewController() (*Controller, error) {
 // 		return false
 // 	}
 // }
-
-func SignUpHandler(w http.ResponseWriter, r *http.Request) {
-
-	t, err := template.ParseFiles("static/signup.html")
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-	}
-	t.ExecuteTemplate(w, "signup.html", nil)
-}
-
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
-	t, err := template.ParseFiles("static/login.html")
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-	}
-	t.ExecuteTemplate(w, "login.html", nil)
-
-}
